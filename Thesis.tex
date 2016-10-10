@@ -1,0 +1,212 @@
+%Dies ist nur ein Muster, es wird keine Gewährleistung auf Korrektheit gegeben! 
+
+% Format des Dokuments
+%    article - Kleinere Schriftwerke, ohne Titelblatt und nur mit einseitigem Druck
+%    report - Mittlere Schriftwerke, mit Titelblatt und einseitigem Druck
+%    book   - Große Schriftwerke, mit Titelblatt und zweiseitigem Druck
+%    letter - Für Briefe 
+\documentclass[numbers=noenddot, a4paper, 12pt]{scrreprt}
+
+% Deutsche Umlaute
+\usepackage[utf8]{inputenc}
+
+% deutsche Silbentrennung
+\usepackage[ngerman]{babel}
+
+% Einbinden von Bildern
+\usepackage{graphicx}
+
+% Unterstützung von Hyperlinks
+\usepackage{url}
+\usepackage{hyperref}
+
+% Mathematische Pakete
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{latexsym}
+\usepackage{morefloats}
+
+\usepackage{geometry} 
+
+%zeilenabstand
+\usepackage{setspace}
+\onehalfspacing
+
+
+% better looking tables
+\usepackage{ifthen}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\newcommand{\forloop}[5][1]{%
+\setcounter{#2}{#3}%
+\ifthenelse{#4}{#5\addtocounter{#2}{#1}%
+\forloop[#1]{#2}{\value{#2}}{#4}{#5}}%
+{}}
+
+\newcounter{crcounter}
+
+\newcommand{\compensaterule}[1]{%
+\forloop{crcounter}{1}{\value{crcounter} < #1}%
+{\vspace*{-\aboverulesep}\vspace*{-\belowrulesep}}}
+
+\newcommand{\multirowbt}[3]{\multirow{#1}{#2}%
+{\compensaterule{#1}#3}}
+
+% inline aufzählungs
+\usepackage{paralist}
+
+% farbdefinitionen
+\usepackage{xcolor}
+\usepackage{color}
+
+% ausgabe von quelltext
+\usepackage{textcomp}
+\usepackage{listings}
+
+
+\lstset{
+%	backgroundcolor=\color{lbcolor},
+	tabsize=4,    
+%	rulecolor=,
+	language=[GNU]C++,
+	basicstyle=\scriptsize,
+	upquote=true,
+	%aboveskip={1.5\baselineskip},
+	columns=fixed,
+	showstringspaces=false,
+	extendedchars=false,
+	breaklines=true,
+	%prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+	%frame=single,
+	numbers=none,
+	showtabs=false,
+	showspaces=false,
+	showstringspaces=false,
+	identifierstyle=\ttfamily,
+	language=C++,
+    basicstyle=\ttfamily,
+    keywordstyle=\color{blue}\ttfamily,
+    stringstyle=\color{red}\ttfamily,
+    commentstyle=\color[rgb]{0,.7,0}\ttfamily,
+    morecomment=[l][\color{magenta}]{\#},
+	%\lstdefinestyle{C++}{language=C++,style=numbers}’,
+}
+\lstset{
+	basicstyle=\renewcommand{\baselinestretch}{.9}\ttfamily,
+	xleftmargin=.5cm,
+	language=C++,
+	numbers=left,
+	stringstyle=\color{black}\ttfamily,
+	keywordstyle=\color{black}\ttfamily,
+	numberstyle=\tiny}
+% acronyme
+\usepackage[printonlyused]{acronym}
+
+% \enquote{quoted text} -> yay
+\usepackage{csquotes}
+
+% coolere referenzen
+\usepackage[german]{fancyref}
+
+% tabellen, formeln und abbildungen ohne chapter praefix
+\usepackage{chngcntr}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+\counterwithout{figure}{chapter}
+
+
+% todo commando, faerbt todos rot ein und schreibt sie uppercase
+\newcommand{\todo}[1]{\textcolor{red}{(TODO: \MakeUppercase{#1})}}
+
+
+\begin{document}
+
+%Definiert das Titelblatt
+\pagenumbering{Roman}
+\begin{titlepage}
+\titlehead{
+	\centering
+	\large \textbf{Ostbayerische Technische Hochschule Regensburg \\
+    				Fakultät Informatik und Mathematik}\\
+	\vspace{1.5cm}     
+	\includegraphics[width=7cm]{./images/HS-Logo_alpha}
+	\vspace{-1mm}
+	\title{\LARGE TITLE}
+	\subtitle{\large Eingereicht zur Erlangung des akademischen Grades \\ \large Bachelor of Science (B. Sc.)}
+	\author{\large AUTHOR\\ \large Matr.Nr.: braucht man wahrscheinlich nicht\\ \large Studiengang: IN}
+	\publishers{\vspace{-1mm}\large Betreut durch Prof. Dr. rer. nat. ...} %\\2. Gutachter: Prof. Dr. Dumbledore}
+}
+\date{\vspace{0mm}\large\today}
+\end{titlepage}
+
+%Setzt den Titel
+\maketitle
+
+% Inhaltsverzeichnis anzeigen
+%\parskip am schluss anpassen, so dass ein zweiseitiges inhaltsverzeichnis gut umgebrochen wird
+{\parskip=+5mm \tableofcontents}
+
+%abkürzungsgroup
+\chapter*{Abkürzungsverzeichnis}
+\addcontentsline{toc}{chapter}{Abkürzungsverzeichnis}
+\input{acronym}
+\newpage
+
+\newcounter{romanPagenumber}
+\setcounter{romanPagenumber}{\value{page}}
+\pagenumbering{arabic}
+
+\input{chapter1}
+\input{chapter2}
+\input{chapter3}
+
+\newpage
+
+\pagenumbering{Roman}
+\setcounter{page}{\theromanPagenumber}
+
+\appendix
+
+%bibgroup
+\begingroup
+\let\cleardoublepage\relax
+\let\clearpage\relax
+\newpage
+\chapter{\bibname}
+\renewcommand{\chapter}[2]{}%
+\bibliography{literatur}%{\nocite{*}}
+\bibliographystyle{unsrt}
+\endgroup
+
+
+%abbildungsgroup
+\begingroup
+\let\cleardoublepage\relax
+\let\clearpage\relax
+\newpage
+\chapter{\listfigurename}
+\renewcommand{\chapter}[2]{}%
+\listoffigures
+\endgroup
+
+\restoregeometry
+%Definiert und setzt die Eigenständigkeitserklärung
+\chapter{Eigenständigkeitserklärung}
+\vspace{15mm} 
+Der Verfasser erklärt, dass er die vorliegende Arbeit selbständig, ohne fremde Hilfe und ohne Benutzung anderer als der angegebenen Hilfsmittel angefertigt hat. Die aus fremden Quellen (einschließlich elektronischer Quellen) direkt oder indirekt übernommenen Gedanken sind ausnahmslos als solche kenntlich gemacht. Die Arbeit ist in gleicher oder ähnlicher Form oder auszugsweise im Rahmen einer anderen Prüfung noch nicht vorgelegt worden.
+
+
+%% Abstand und Linie
+\vspace{20mm}
+\hrule
+\vspace{5mm}
+Regensburg, \date{\today}
+ 
+\vspace{5cm}
+
+
+
+\end{document}

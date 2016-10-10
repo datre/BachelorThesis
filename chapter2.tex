@@ -1,0 +1,53 @@
+\chapter{kapitel 2}
+\section{IDE einrichten}
+http://stackoverflow.com/questions/33676829/vim-configuration-for-linux-kernel-development
+http://vim.wikia.com/wiki/Vim\_buffer\_FAQ
+\section{Function tracing}
+Um herauszufinden, welche Funktionen beim 'Tegra TK1' für die UART-Baudrate zuständig ist, habe ich mir die relevanten Funktionen ausgeben lassen. Da als Plattform 'ARM' eingesetzt wird, befindet sich im Ordner 'arch/arm/boot/dts' im Linux Kernel Projekt die Namen, welche anzeigen, für welches Bauteil welcher Treiber bei welcher Adresse benutzt wird. In der Datei 'tegra124.dtsi' lässt sich dann herausfinden, dass der Uart-Treiber auf dem '8250'-Chip basiert. In 'drivers/tty/serial/8250' sind die relevanten Quelldateien vorhanden. Um zu sehen, wie der Linux-Kernel die Baudrate ändert, lässt sich als zu filternder Funktionsnamenspräfix \enquote{serial8250} ausmachen. 	
+
+Dafür müssen im Linux Kernel unter \enquote{Kernel Hacking -> Tracers} die Optionen für \enquote{Kernel Function Tracer}, \enquote{Kernel Function Graph Tracer} und \enquote{enable/disable function tracing dynamically} auf \enquote{true} gesetzt werden. Anschließend ist es möglich, die Traces in einen eingehängten Ordner schreiben zu lassen. Hierfür kann man entweder das Dateisystem zur Laufzeit mittels 'mount -t debugfs nodev /sys/kernel/debug' oder zum Betriebssystemstart mittels \enquote{echo "debugfs       /sys/kernel/debug          debugfs defaults        0       0" >> /etc/fstab} einhängen. 
+
+Danach schalte ich das Tracing mittels \enquote{echo 0 > /sys/kernel/debug/tracing/tracing\_on} aus, um irrelevante Einträge zu vermeiden. 
+
+echo function\_graph > current\_tracer
+
+echo serial8250* > set\_ftrace\_filter
+
+echo 1 > tracing\_on
+
+cat trace\_pipe
+
+\section{Uart driver}
+Speziellen divisor setzen:
+Clk speed / baud << 4
+Sense Value register is updated with the count value. The low 20
+bits of the ASR give the number of clocks within a single bit. Because the UART uses 16x oversampling, the resulting value
+needs to be adjusted by shifting right 4 bits, then loading the resulting count in the divisor latch of the UART. (In the code
+snippet below, the lower 4 bits are rounded to give slightly greater accuracy.)
+(Technical Reference Manual 2408)
+408000000 / 16 * 115200 (1843200) = 221
+
+\section{rtems}
+Kein Support für Tegra
+git clone git://git.rtems.org/rtems.git rtems 
+cd rtems
+\subsection{rtems-source-builder}
+mkdir src
+cd src
+git clone git://git.rtems.org/rtems-source-builder.git
+cd rtems-source-builder
+source-builder/sb-check
+../source-builder/sb-set-builder --log=l-arm.txt --prefix=\$(pwd)/4.12 4.12/rtems-arm
+
+\section{Linaro-Hikey}
+Zwei Anleitungen führen zum Ziel, eine zur Verzweiflung XD
+Erst uefi, dann der Rest:
+https://github.com/96boards/documentation/wiki/HiKeyUEFI
+http://wiki.lemaker.org/HiKey(LeMaker\_version):Building\_Debian\_from\_Source\_Code
+dir=\$(pwd); cd /usr/bin; sudo mv python python.bck; sudo ln -s python2.7 python; cd \$dir; \${UEFI\_TOOLS\_DIR}/uefi-build.sh -b RELEASE -a ../arm-trusted-firmware hikey -c ../LinaroPkg/platforms.config; cd /usr/bin/; sudo mv python.bck python; cd \$dir
+
+\section{Notes}
+25.08.2016 Patch durch Infos mittels tracing aus Linux Kernel geschrieben, 0xDD als divisor, sonst gleich zu 8250-Treiber in jailhouse
+.gitconfig mit [sendemail] eingerichtet
+Rebase mit git durchgeführt, historie überarbeitet um E-Mail zu ändern (rebase -i -p HEAD~2; git commit --amend --author "Name <Mail>"; git rebase --continue)
+Erste Gehversuche mit RTEMS - kein Port für jetson-tk1 oder HiKey vorhanden
